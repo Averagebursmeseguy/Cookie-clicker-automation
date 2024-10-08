@@ -6,7 +6,7 @@ options = webdriver.ChromeOptions()
 options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=options)
 
-buildings = []
+buildings = {}
 
 driver.get(url="https://orteil.dashnet.org/cookieclicker/")
 time.sleep(5)
@@ -20,14 +20,23 @@ time.sleep(3)
 
 
 class Building():
-    def __init__(self, button, price, count):
-        self.button = self.button(button)
+    def __init__(self, button, price, count, achievable, name):
+        self.button = self.find_button(button)
         self.price = self.find_price(price)
         self.count = self.find_count(count)
+        self.achievable = achievable
+        self.name = self.find_name(name)
+
+    def find_name(self, id_name):
+        name = driver.find_element(by=By.ID, value=id_name)
+        return name.text.lower()
 
     def find_price(self, target_id):
         raw_price = driver.find_element(by=By.ID, value=target_id).text.split(" ")
-        prefix = int(raw_price[0].replace(",", ""))
+        try:
+            prefix = int(raw_price[0].replace(",", ""))
+        except:
+            prefix = 0
         suffix = raw_price[-1]
         actual_price = 0
 
@@ -66,21 +75,32 @@ class Building():
 
         return actual_count
 
-    def button(self, target_id):
+    def find_button(self, target_id):
         button = driver.find_element(by=By.ID, value=target_id)
         return button
 
 
-def load():
-    for i in range(0, 19):
+def load():  # makes building objects for iterating and to make automation easier
+    for p in range(0, 19):
 
-        try:
-            new_building = Building(f"product{str(i)}", f"productPrice{str(i)}", f"productOwned{str(i)}")
-            buildings.append(new_building)
-            print(f"price = {new_building.price}")
+        new_building = Building(f"product{str(p)}", f"productPrice{str(p)}", f"productOwned{str(p)}", False,
+                                f"productName{str(p)}")
 
-        except:
-            print(Exception)
+        if new_building.button.get_attribute("class") == "product unlocked enabled":
+            new_building.achievable = True
+
+            if new_building.name not in buildings:
+                buildings[f"{new_building.name}"] = new_building  # checks if name is already used as a dict key
+            else:
+                pass
+
+        elif new_building.button.get_attribute("class") == "product unlocked disabled":
+            new_building.achievable = False
+
+        # print(f"{new_building.price}, {new_building.achievable}, {new_building.count}, {new_building.button}")
+
+        print(f"price = {new_building.price}")
+
 
 for i in range(150):
     cookie = driver.find_element(by=By.CSS_SELECTOR, value="#bigCookie")
@@ -89,6 +109,8 @@ for i in range(150):
     print(cookie_count)
     if cookie_count > 100:
         load()
+
+print(buildings)
 
 # while True:
 #     cookie = driver.find_element(by=By.CSS_SELECTOR, value="#bigCookie")
