@@ -113,7 +113,7 @@ def purchase(money):
             pass
 
         print(f"Purchased buildings:"
-              f"{building.name}: {building.count}\n")
+              f"{building.name}\n")
 
 
 
@@ -122,11 +122,17 @@ timer = time.time()
 while True:
     cookie = driver.find_element(by=By.CSS_SELECTOR, value="#bigCookie")
     cookie.click()
-    cookie_count = int(driver.find_element(by=By.ID, value="cookies").text.split(" ")[0])
+    cookie_count = int(driver.find_element(by=By.ID, value="cookies").text.split(" ")[0].replace(",", ""))
+    cookie_suffix = driver.find_element(by=By.ID, value="cookies").text
+
 
     if int(time.time() - timer) == 5:
         refresh()
         purchase(cookie_count)
+
+        print(buildings)
+
+        print(cookie_suffix)
 
         timer = time.time()
 
