@@ -20,7 +20,7 @@ lang_choice_eng_button.click()
 time.sleep(3)
 
 
-class Building():  # class used to represent each purchased building
+class Building:  # class used to represent each purchased building
     def __init__(self, button, price, count, achievable, name):
         self.button = self.find_button(button)
         self.price = self.find_price(price)
@@ -73,12 +73,21 @@ class Building():  # class used to represent each purchased building
             actual_count = 0
         else:
             actual_count = int(raw_count)
-
         return actual_count
 
     def find_button(self, target_id):
         button = driver.find_element(by=By.ID, value=target_id)
         return button
+
+
+def click_upgrades():
+    for i in range(0, 5):
+        try:
+            unlocked_unlocked = driver.find_element(by=By.ID, value=f"upgrade{str(i)}")
+            if unlocked_unlocked.get_attribute("class") == "crate upgrade enabled":
+                unlocked_unlocked.click()
+        except:
+            pass
 
 
 def refresh():  # makes building objects for iterating and to make automation easier
@@ -116,7 +125,6 @@ def purchase(money):
               f"{building.name}\n")
 
 
-
 timer = time.time()
 
 while True:
@@ -125,18 +133,16 @@ while True:
     cookie_count = int(driver.find_element(by=By.ID, value="cookies").text.split(" ")[0].replace(",", ""))
     cookie_suffix = driver.find_element(by=By.ID, value="cookies").text
 
-
     if int(time.time() - timer) == 5:
         refresh()
         purchase(cookie_count)
+        click_upgrades()
 
         print(buildings)
 
         print(cookie_suffix)
 
         timer = time.time()
-
-
 
 # while True:
 #     cookie = driver.find_element(by=By.CSS_SELECTOR, value="#bigCookie")
