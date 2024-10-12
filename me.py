@@ -56,3 +56,15 @@
 #
 # if bob[-1] in magnitudes:
 #     print(bob[0]*magnitudes[bob[-1]])
+
+
+import time
+
+start = time.time()
+
+while True:
+
+    print(f"{int(time.time())-start}")
+    start = int(time.time())
+    time.sleep(2)
+

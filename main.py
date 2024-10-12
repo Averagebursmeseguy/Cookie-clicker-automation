@@ -7,6 +7,7 @@ options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=options)
 
 buildings = {}
+cookie_count = 0
 
 driver.get(url="https://orteil.dashnet.org/cookieclicker/")
 time.sleep(5)
@@ -19,7 +20,7 @@ lang_choice_eng_button.click()
 time.sleep(3)
 
 
-class Building():
+class Building:  # class used to represent each purchased building
     def __init__(self, button, price, count, achievable, name):
         self.button = self.find_button(button)
         self.price = self.find_price(price)
@@ -72,7 +73,6 @@ class Building():
             actual_count = 0
         else:
             actual_count = int(raw_count)
-
         return actual_count
 
     def find_button(self, target_id):
@@ -80,7 +80,17 @@ class Building():
         return button
 
 
-def load():  # makes building objects for iterating and to make automation easier
+def click_upgrades():
+    for i in range(0, 5):
+        try:
+            unlocked_unlocked = driver.find_element(by=By.ID, value=f"upgrade{str(i)}")
+            if unlocked_unlocked.get_attribute("class") == "crate upgrade enabled":
+                unlocked_unlocked.click()
+        except:
+            pass
+
+
+def refresh():  # makes building objects for iterating and to make automation easier
     for p in range(0, 19):
 
         new_building = Building(f"product{str(p)}", f"productPrice{str(p)}", f"productOwned{str(p)}", False,
@@ -99,18 +109,40 @@ def load():  # makes building objects for iterating and to make automation easie
 
         # print(f"{new_building.price}, {new_building.achievable}, {new_building.count}, {new_building.button}")
 
-        print(f"price = {new_building.price}")
+        # print(f"price = {new_building.price}")
 
 
-for i in range(150):
+def purchase(money):
+    for name, building in buildings.items():
+
+        if money > building.price:
+            building.button.click()
+
+        else:
+            pass
+
+        print(f"Purchased buildings:"
+              f"{building.name}\n")
+
+
+timer = time.time()
+
+while True:
     cookie = driver.find_element(by=By.CSS_SELECTOR, value="#bigCookie")
     cookie.click()
-    cookie_count = int(driver.find_element(by=By.ID, value="cookies").text.split(" ")[0])
-    print(cookie_count)
-    if cookie_count > 100:
-        load()
+    cookie_count = int(driver.find_element(by=By.ID, value="cookies").text.split(" ")[0].replace(",", ""))
+    cookie_suffix = driver.find_element(by=By.ID, value="cookies").text
 
-print(buildings)
+    if int(time.time() - timer) == 5:
+        refresh()
+        purchase(cookie_count)
+        click_upgrades()
+
+        print(buildings)
+
+        print(cookie_suffix)
+
+        timer = time.time()
 
 # while True:
 #     cookie = driver.find_element(by=By.CSS_SELECTOR, value="#bigCookie")
